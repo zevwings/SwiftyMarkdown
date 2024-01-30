@@ -38,6 +38,7 @@ public enum Remove {
     case trailing
     case both
     case entireLine
+    case entireRegex
     case none
 }
 
@@ -140,6 +141,11 @@ public class SwiftyLineProcessor {
 			case .entireLine:
 				let maybeOutput = output.replacingOccurrences(of: element.token, with: "")
 				output = ( maybeOutput.isEmpty ) ? maybeOutput : output
+            case .entireRegex:
+                if let regex = try? NSRegularExpression(pattern: "```[\\w]{0,}") {
+                    let maybeOutput = regex.stringByReplacingMatches(in: output, options: NSRegularExpression.MatchingOptions(rawValue: 0), range: NSMakeRange(0, output.count), withTemplate: "")
+                    output = ( maybeOutput.isEmpty ) ? maybeOutput : output
+                }
             default:
                 break
             }

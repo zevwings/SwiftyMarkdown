@@ -44,7 +44,12 @@ It ignores random * and correctly handles escaped \*asterisks\* and \_underlines
 1. List item
 1. List item
 1. List item
-1. List item
+1.  `List item`
 
 
+```swift
+let i = 1
+i += 1
 
+print(i)
+```
