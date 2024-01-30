@@ -75,6 +75,8 @@ public class SwiftyLineProcessor {
 	public var processEmptyStrings : LineStyling?
 	public internal(set) var frontMatterAttributes : [String : String] = [:]
 	
+    var blockLineStyling : LineStyling?
+    var isInBlock : Bool = false
 	var closeToken : String? = nil
     let defaultType : LineStyling
     
@@ -143,6 +145,7 @@ public class SwiftyLineProcessor {
 				output = ( maybeOutput.isEmpty ) ? maybeOutput : output
             case .entireRegex:
                 if let regex = try? NSRegularExpression(pattern: "```[\\w]{0,}") {
+                    isInBlock = !isInBlock
                     let maybeOutput = regex.stringByReplacingMatches(in: output, options: NSRegularExpression.MatchingOptions(rawValue: 0), range: NSMakeRange(0, output.count), withTemplate: "")
                     output = ( maybeOutput.isEmpty ) ? maybeOutput : output
                 }
@@ -158,8 +161,10 @@ public class SwiftyLineProcessor {
 				return nil
 			}
 
-			
-			
+            if isInBlock {
+                blockLineStyling = element.type
+            }
+
             output = (element.shouldTrim) ? output.trimmingCharacters(in: .whitespaces) : output
             return SwiftyLine(line: output, lineStyle: element.type)
             
@@ -173,7 +178,8 @@ public class SwiftyLineProcessor {
 			}
 		}
 		
-        return SwiftyLine(line: text.trimmingCharacters(in: .whitespaces), lineStyle: defaultType)
+        let blockLineStyling = blockLineStyling ?? defaultType
+        return SwiftyLine(line: text.trimmingCharacters(in: .whitespaces), lineStyle: isInBlock ? blockLineStyling : defaultType)
     }
 	
 	func processFrontMatter( _ strings : [String] ) -> [String] {
